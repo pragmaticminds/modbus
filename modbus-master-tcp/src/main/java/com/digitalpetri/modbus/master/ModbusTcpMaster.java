@@ -39,11 +39,19 @@ import com.digitalpetri.modbus.codec.ModbusTcpPayload;
 import com.digitalpetri.modbus.requests.ModbusRequest;
 import com.digitalpetri.modbus.responses.ExceptionResponse;
 import com.digitalpetri.modbus.responses.ModbusResponse;
+import com.digitalpetri.netty.fsm.ChannelActions;
+import com.digitalpetri.netty.fsm.ChannelFsm;
+import com.digitalpetri.netty.fsm.ChannelFsmConfig;
+import com.digitalpetri.netty.fsm.ChannelFsmFactory;
+import com.digitalpetri.netty.fsm.Event;
+import com.digitalpetri.netty.fsm.State;
+import com.digitalpetri.strictmachine.FsmContext;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -69,14 +77,23 @@ public class ModbusTcpMaster {
     private final Counter timeoutCounter = new Counter();
     private final Timer responseTimer = new Timer();
 
-    private final ChannelManager channelManager;
+    private final ChannelFsm channelFsm;
 
     private final ModbusTcpMasterConfig config;
 
     public ModbusTcpMaster(ModbusTcpMasterConfig config) {
         this.config = config;
 
-        channelManager = new ChannelManager(this);
+        ChannelFsmConfig fsmConfig = ChannelFsmConfig.newBuilder()
+            .setLazy(true)
+            .setPersistent(true)
+            .setMaxIdleSeconds(0)
+            .setChannelActions(new ModbusChannelActions())
+            .setExecutor(config.getExecutor())
+            .setLoggerName("com.digitalpetri.modbus.ChannelFsm")
+            .build();
+
+        channelFsm = ChannelFsmFactory.newChannelFsm(fsmConfig);
 
         metrics.put(metricName("request-counter"), requestCounter);
         metrics.put(metricName("response-counter"), responseCounter);
@@ -90,24 +107,19 @@ public class ModbusTcpMaster {
     }
 
     public CompletableFuture<ModbusTcpMaster> connect() {
-        CompletableFuture<ModbusTcpMaster> future = new CompletableFuture<>();
-
-        channelManager.getChannel().whenComplete((ch, ex) -> {
-            if (ch != null) future.complete(ModbusTcpMaster.this);
-            else future.completeExceptionally(ex);
-        });
-
-        return future;
+        return channelFsm.connect()
+            .thenApply(ch -> ModbusTcpMaster.this);
     }
 
     public CompletableFuture<ModbusTcpMaster> disconnect() {
-        return channelManager.disconnect().thenApply(v -> this);
+        return channelFsm.disconnect()
+            .thenApply(v -> ModbusTcpMaster.this);
     }
 
     public <T extends ModbusResponse> CompletableFuture<T> sendRequest(ModbusRequest request, int unitId) {
         CompletableFuture<T> future = new CompletableFuture<>();
 
-        channelManager.getChannel().whenComplete((ch, ex) -> {
+        channelFsm.getChannel().whenComplete((ch, ex) -> {
             if (ch != null) {
                 short txId = (short) transactionId.incrementAndGet();
 
@@ -305,6 +317,34 @@ public class ModbusTcpMaster {
                     future.completeExceptionally(ex);
                 }
             });
+        }
+
+    }
+
+    private final class ModbusChannelActions implements ChannelActions {
+
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
+        @Override
+        public CompletableFuture<Channel> connect(FsmContext<State, Event> ctx) {
+            return ModbusTcpMaster.bootstrap(ModbusTcpMaster.this, ModbusTcpMaster.this.getConfig());
+        }
+
+        @Override
+        public CompletableFuture<Void> disconnect(FsmContext<State, Event> ctx, Channel channel) {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+
+            channel.pipeline().addFirst(new ChannelInboundHandlerAdapter() {
+                @Override
+                public void channelInactive(ChannelHandlerContext ctx) {
+                    logger.debug("channelInactive(), disconnect complete");
+                    future.complete(null);
+                }
+            });
+
+            channel.close();
+
+            return future;
         }
 
     }
