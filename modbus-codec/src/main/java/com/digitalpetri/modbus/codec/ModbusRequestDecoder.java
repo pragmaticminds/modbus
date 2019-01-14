@@ -19,17 +19,11 @@ package com.digitalpetri.modbus.codec;
 import com.digitalpetri.modbus.FunctionCode;
 import com.digitalpetri.modbus.ModbusPdu;
 import com.digitalpetri.modbus.UnsupportedPdu;
-import com.digitalpetri.modbus.requests.MaskWriteRegisterRequest;
-import com.digitalpetri.modbus.requests.ReadCoilsRequest;
-import com.digitalpetri.modbus.requests.ReadDiscreteInputsRequest;
-import com.digitalpetri.modbus.requests.ReadHoldingRegistersRequest;
-import com.digitalpetri.modbus.requests.ReadInputRegistersRequest;
-import com.digitalpetri.modbus.requests.WriteMultipleCoilsRequest;
-import com.digitalpetri.modbus.requests.WriteMultipleRegistersRequest;
-import com.digitalpetri.modbus.requests.WriteSingleCoilRequest;
-import com.digitalpetri.modbus.requests.WriteSingleRegisterRequest;
+import com.digitalpetri.modbus.requests.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
+
+import static com.digitalpetri.modbus.FunctionCode.PBGetCommandPackage;
 
 public class ModbusRequestDecoder implements ModbusPduDecoder {
 
@@ -72,6 +66,21 @@ public class ModbusRequestDecoder implements ModbusPduDecoder {
 
             case MaskWriteRegister:
                 return decodeMaskWriteRegister(buffer);
+
+            case CommunicationTest:
+                return decodeCommunicationTest(buffer);
+
+            case PBGetVariable:
+                return decodePBGetVariable(buffer);
+
+            case PBSetAndGetVariable:
+                return decodePBSetAndGetVariable(buffer);
+
+            case PBGetCommandPackage:
+                return decodePBGetCommandPackage(buffer);
+
+            case PBSetAndGetCommandPackage:
+                return decodePBSetAndGetCommandPackage(buffer);
 
             default:
                 return new UnsupportedPdu(functionCode);
@@ -144,6 +153,33 @@ public class ModbusRequestDecoder implements ModbusPduDecoder {
         int orMask = buffer.readUnsignedShort();
 
         return new MaskWriteRegisterRequest(address, andMask, orMask);
+    }
+
+    private CommunicationTestRequest decodeCommunicationTest(ByteBuf buffer) {
+        return new CommunicationTestRequest();
+    }
+
+    private PBGetVariableRequest decodePBGetVariable(ByteBuf buffer) {
+        int address = buffer.readUnsignedShort();
+        return new PBGetVariableRequest(address);
+    }
+
+    private PBSetAndGetVariableRequest decodePBSetAndGetVariable(ByteBuf buffer) {
+        int address = buffer.readUnsignedShort();
+        long value = buffer.readUnsignedInt();
+        return new PBSetAndGetVariableRequest(address, value);
+    }
+
+    private PBGetCommandPackageRequest decodePBGetCommandPackage(ByteBuf buffer) {
+        int address = buffer.readUnsignedShort();
+        return new PBGetCommandPackageRequest(address);
+    }
+
+    private PBSetAndGetCommandPackageRequest decodePBSetAndGetCommandPackage(ByteBuf buffer) {
+        int address = buffer.readUnsignedShort();
+        int byteCount = buffer.readUnsignedShort();
+        ByteBuf values = buffer.readSlice(byteCount).retain();
+        return new PBSetAndGetCommandPackageRequest(address, values);
     }
 
 }

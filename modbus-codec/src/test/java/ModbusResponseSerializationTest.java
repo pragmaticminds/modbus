@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
+import com.digitalpetri.modbus.ModbusPdu;
 import com.digitalpetri.modbus.codec.ModbusResponseDecoder;
 import com.digitalpetri.modbus.codec.ModbusResponseEncoder;
-import com.digitalpetri.modbus.responses.MaskWriteRegisterResponse;
-import com.digitalpetri.modbus.responses.ReadCoilsResponse;
-import com.digitalpetri.modbus.responses.ReadDiscreteInputsResponse;
-import com.digitalpetri.modbus.responses.ReadHoldingRegistersResponse;
-import com.digitalpetri.modbus.responses.ReadInputRegistersResponse;
-import com.digitalpetri.modbus.responses.WriteMultipleCoilsResponse;
-import com.digitalpetri.modbus.responses.WriteMultipleRegistersResponse;
-import com.digitalpetri.modbus.responses.WriteSingleCoilResponse;
-import com.digitalpetri.modbus.responses.WriteSingleRegisterResponse;
+import com.digitalpetri.modbus.requests.*;
+import com.digitalpetri.modbus.responses.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.testng.annotations.Test;
@@ -153,4 +147,62 @@ public class ModbusResponseSerializationTest {
         assertEquals(response.getOrMask(), decoded.getOrMask());
     }
 
+    @Test
+    public void testCommunicationTestResponse() {
+        CommunicationTestResponse response = new CommunicationTestResponse();
+
+        ByteBuf encoded = encoder.encode(response, Unpooled.buffer());
+        CommunicationTestResponse decoded = (CommunicationTestResponse) decoder.decode(encoded);
+    }
+
+    @Test
+    public void testPBGetVariableResponse() {
+        PBGetVariableResponse response = new PBGetVariableResponse(0, 0L);
+
+        ByteBuf encoded = encoder.encode(response, Unpooled.buffer());
+        PBGetVariableResponse decoded = (PBGetVariableResponse) decoder.decode(encoded);
+
+        assertEquals(response.getAddress(), decoded.getAddress());
+        assertEquals(response.getValue(), decoded.getValue());
+    }
+
+    @Test
+    public void testPBSetAndGetVariableResponse() {
+        PBSetAndGetVariableResponse response = new PBSetAndGetVariableResponse(0, 0L);
+
+        ByteBuf encoded = encoder.encode(response, Unpooled.buffer());
+        ModbusPdu decode = decoder.decode(encoded);
+        PBSetAndGetVariableResponse decoded = (PBSetAndGetVariableResponse) decode;
+
+        assertEquals(response.getAddress(), decoded.getAddress());
+        assertEquals(response.getValue(), decoded.getValue());
+    }
+
+    @Test
+    public void testPBGetCommandPackageResponse() {
+        PBGetCommandPackageResponse response = new PBGetCommandPackageResponse(0, Unpooled.wrappedBuffer(new byte[]{1, 2, 3, 4}));
+        response.retain().content().markReaderIndex();
+
+        ByteBuf encoded = encoder.encode(response, Unpooled.buffer());
+        PBGetCommandPackageResponse decoded = (PBGetCommandPackageResponse) decoder.decode(encoded);
+
+        response.content().resetReaderIndex();
+
+        assertEquals(response.getAddress(), decoded.getAddress());
+        assertEquals(response.getValues(), decoded.getValues());
+    }
+
+    @Test
+    public void testPBSetAndGetCommandPackageResponse() {
+        PBSetAndGetCommandPackageResponse response = new PBSetAndGetCommandPackageResponse(0, Unpooled.wrappedBuffer(new byte[]{1, 2, 3, 4}));
+        response.retain().content().markReaderIndex();
+
+        ByteBuf encoded = encoder.encode(response, Unpooled.buffer());
+        PBSetAndGetCommandPackageResponse decoded = (PBSetAndGetCommandPackageResponse) decoder.decode(encoded);
+
+        response.content().resetReaderIndex();
+
+        assertEquals(response.getAddress(), decoded.getAddress());
+        assertEquals(response.getValues(), decoded.getValues());
+    }
 }
