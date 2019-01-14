@@ -19,7 +19,6 @@ package com.digitalpetri.modbus;
 import java.util.Optional;
 
 public enum FunctionCode {
-
     ReadCoils(0x01),
     ReadDiscreteInputs(0x02),
     ReadHoldingRegisters(0x03),
@@ -38,7 +37,12 @@ public enum FunctionCode {
     MaskWriteRegister(0x16),
     ReadWriteMultipleRegisters(0x17),
     ReadFifoQueue(0x18),
-    EncapsulatedInterfaceTransport(0x2B);
+    EncapsulatedInterfaceTransport(0x2B),
+    CommunicationTest(0x41),
+    PBGetVariable(0x42),
+    PBSetAndGetVariable(0x43),
+    PBGetCommandPackage(0x44),
+    PBSetAndGetCommandPackage(0x45);
 
     private final int code;
 
@@ -71,6 +75,11 @@ public enum FunctionCode {
             case 0x17: return Optional.of(ReadWriteMultipleRegisters);
             case 0x18: return Optional.of(ReadFifoQueue);
             case 0x2B: return Optional.of(EncapsulatedInterfaceTransport);
+            case 0x41: return Optional.of(CommunicationTest);
+            case 0x42: return Optional.of(PBGetVariable);
+            case 0x43: return Optional.of(PBSetAndGetVariable);
+            case 0x44: return Optional.of(PBGetCommandPackage);
+            case 0x45: return Optional.of(PBSetAndGetCommandPackage);
         }
 
         return Optional.empty();

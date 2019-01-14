@@ -17,16 +17,7 @@
 package com.digitalpetri.modbus.codec;
 
 import com.digitalpetri.modbus.ModbusPdu;
-import com.digitalpetri.modbus.responses.ExceptionResponse;
-import com.digitalpetri.modbus.responses.MaskWriteRegisterResponse;
-import com.digitalpetri.modbus.responses.ReadCoilsResponse;
-import com.digitalpetri.modbus.responses.ReadDiscreteInputsResponse;
-import com.digitalpetri.modbus.responses.ReadHoldingRegistersResponse;
-import com.digitalpetri.modbus.responses.ReadInputRegistersResponse;
-import com.digitalpetri.modbus.responses.WriteMultipleCoilsResponse;
-import com.digitalpetri.modbus.responses.WriteMultipleRegistersResponse;
-import com.digitalpetri.modbus.responses.WriteSingleCoilResponse;
-import com.digitalpetri.modbus.responses.WriteSingleRegisterResponse;
+import com.digitalpetri.modbus.responses.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.EncoderException;
 import io.netty.util.ReferenceCountUtil;
@@ -66,6 +57,21 @@ public class ModbusResponseEncoder implements ModbusPduEncoder {
 
                     case MaskWriteRegister:
                         return encodeMaskWriteRegister((MaskWriteRegisterResponse) modbusPdu, buffer);
+
+                    case CommunicationTest:
+                        return encodeCommunicationTest((CommunicationTestResponse) modbusPdu, buffer);
+
+                    case PBGetVariable:
+                        return encodePBGetVariable((PBGetVariableResponse) modbusPdu, buffer);
+
+                    case PBSetAndGetVariable:
+                        return encodePBSetAndGetVariable((PBSetAndGetVariableResponse) modbusPdu, buffer);
+
+                    case PBGetCommandPackage:
+                        return encodePBGetCommandPackage((PBGetCommandPackageResponse) modbusPdu, buffer);
+
+                    case PBSetAndGetCommandPackage:
+                        return encodePBSetAndGetCommandPackage((PBSetAndGetCommandPackageResponse) modbusPdu, buffer);
 
                     default:
                         throw new EncoderException("FunctionCode not supported: " + modbusPdu.getFunctionCode());
@@ -156,5 +162,40 @@ public class ModbusResponseEncoder implements ModbusPduEncoder {
         return buffer;
     }
 
+    private ByteBuf encodeCommunicationTest(CommunicationTestResponse response, ByteBuf buffer) {
+        buffer.writeByte(response.getFunctionCode().getCode());
+        return buffer;
+    }
 
+    private ByteBuf encodePBGetVariable(PBGetVariableResponse response, ByteBuf buffer) {
+        buffer.writeByte(response.getFunctionCode().getCode());
+        buffer.writeShort(response.getAddress());
+        buffer.writeInt((int) response.getValue());
+        return buffer;
+    }
+
+    private ByteBuf encodePBSetAndGetVariable(PBSetAndGetVariableResponse response, ByteBuf buffer) {
+        buffer.writeByte(response.getFunctionCode().getCode());
+        buffer.writeShort(response.getAddress());
+        buffer.writeInt((int) response.getValue());
+        return buffer;
+    }
+
+    private ByteBuf encodePBGetCommandPackage(PBGetCommandPackageResponse response, ByteBuf buffer) {
+        buffer.writeByte(response.getFunctionCode().getCode());
+        buffer.writeShort(response.getAddress());
+        ByteBuf values = response.getValues();
+        buffer.writeShort(values.readableBytes());
+        buffer.writeBytes(values);
+        return buffer;
+    }
+
+    private ByteBuf encodePBSetAndGetCommandPackage(PBSetAndGetCommandPackageResponse response, ByteBuf buffer) {
+        buffer.writeByte(response.getFunctionCode().getCode());
+        buffer.writeShort(response.getAddress());
+        ByteBuf values = response.getValues();
+        buffer.writeShort(values.readableBytes());
+        buffer.writeBytes(values);
+        return buffer;
+    }
 }
