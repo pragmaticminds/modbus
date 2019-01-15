@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.digitalpetri.modbus</groupId>
+        <groupId>org.pragmaticminds.modbus</groupId>
         <artifactId>modbus</artifactId>
         <version>1.1.2-SNAPSHOT</version>
     </parent>
@@ -28,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.digitalpetri.modbus</groupId>
+            <groupId>org.pragmaticminds.modbus</groupId>
             <artifactId>modbus-codec</artifactId>
             <version>1.1.2-SNAPSHOT</version>
         </dependency>
