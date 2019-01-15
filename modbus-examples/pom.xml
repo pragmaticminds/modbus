@@ -19,23 +19,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.pragmaticminds.modbus</groupId>
+        <groupId>org.pragmaticminds</groupId>
         <artifactId>modbus</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>modbus-examples</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.pragmaticminds.modbus</groupId>
+            <groupId>org.pragmaticminds</groupId>
             <artifactId>modbus-master-tcp</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
-            <groupId>org.pragmaticminds.modbus</groupId>
+            <groupId>org.pragmaticminds</groupId>
             <artifactId>modbus-slave-tcp</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

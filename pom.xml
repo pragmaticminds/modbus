@@ -18,9 +18,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.pragmaticminds.modbus</groupId>
+    <groupId>org.pragmaticminds</groupId>
     <artifactId>modbus</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
 
     <name>Modbus</name>
@@ -187,6 +187,35 @@
                 </configuration>
             </plugin>
 
+            <!--Snapshot Deployment-->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <serverId>nexus</serverId>
+                    <nexusUrl>http://nexus.pragmatic.local:8081/nexus/content/repositories/releases</nexusUrl>
+                    <!--<nexusUrl>http://192.168.169.10:8082/nexus</nexusUrl>-->
+                    <skipStaging>true</skipStaging>
+                </configuration>
+            </plugin>
             <!--Release Plugin for doing releases-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -212,11 +241,13 @@
     <distributionManagement>
         <snapshotRepository>
             <id>nexus-snapshots</id>
-            <url>http://192.168.169.31:8081//repository/maven-snapshots/</url>
+            <url>http://nexus.pragmatic.local:8081/repository/maven-snapshots/</url>
+            <!--<url>http://192.168.169.31:8081/repository/maven-snapshots/</url>-->
         </snapshotRepository>
         <repository>
             <id>nexus-releases</id>
-            <url>http://192.168.169.31:8081/repository/maven-releases/</url>
+            <url>http://nexus.pragmatic.local:8081/repository/maven-releases/</url>
+            <!--<url>http://192.168.169.31:8081/repository/maven-releases/</url>-->
         </repository>
     </distributionManagement>
 

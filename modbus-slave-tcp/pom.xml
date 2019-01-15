@@ -19,18 +19,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.pragmaticminds.modbus</groupId>
+        <groupId>org.pragmaticminds</groupId>
         <artifactId>modbus</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>modbus-slave-tcp</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.pragmaticminds.modbus</groupId>
+            <groupId>org.pragmaticminds</groupId>
             <artifactId>modbus-codec</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
