@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.pragmaticminds</groupId>
         <artifactId>modbus</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </parent>
 
     <artifactId>modbus-master-tcp</artifactId>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.pragmaticminds</groupId>
             <artifactId>modbus-codec</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
