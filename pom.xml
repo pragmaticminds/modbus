@@ -20,7 +20,7 @@
 
     <groupId>org.pragmaticminds</groupId>
     <artifactId>modbus</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <packaging>pom</packaging>
 
     <name>Modbus</name>

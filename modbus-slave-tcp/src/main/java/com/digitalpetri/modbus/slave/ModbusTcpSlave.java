@@ -152,6 +152,26 @@ public class ModbusTcpSlave {
                 handler.onMaskWriteRegister(ModbusTcpServiceRequest.of(payload, ctx.channel()));
                 break;
 
+            case CommunicationTest:
+                handler.onCommunicationTest(ModbusTcpServiceRequest.of(payload, ctx.channel()));
+                break;
+
+            case PBGetVariable:
+                handler.onPBGetCommandPackage(ModbusTcpServiceRequest.of(payload, ctx.channel()));
+                break;
+
+            case PBSetAndGetVariable:
+                handler.onPBSetAndGetVariable(ModbusTcpServiceRequest.of(payload, ctx.channel()));
+                break;
+
+            case PBGetCommandPackage:
+                handler.onPBGetCommandPackage(ModbusTcpServiceRequest.of(payload, ctx.channel()));
+                break;
+
+            case PBSetAndGetCommandPackage:
+                handler.onPBSetAndGetCommandPackage(ModbusTcpServiceRequest.of(payload, ctx.channel()));
+                break;
+
             default:
                 /* Function code not currently supported */
                 ExceptionResponse response = new ExceptionResponse(
